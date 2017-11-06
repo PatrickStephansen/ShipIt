@@ -1,0 +1,9 @@
+{
+    "Author" : "Patrick Stephansen",
+    "Email" : "patrick@entelect.co.za",
+    "NickName" : "ShipIt!",
+    "BotType": "JavaScript",
+    "ProjectLocation" : "",
+    "RunFile" : "bot.js",
+    "RunArgs" : ""
+}
