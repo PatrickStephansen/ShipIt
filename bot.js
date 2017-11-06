@@ -85,11 +85,14 @@ function getAmmoType(state) {
     SingleShot: { value: 1, command: '1' }
   };
 
-  let bestAmmo = []
-    .concat(...myShips.map(s => s.Weapons))
-    .filter(w => w.EnergyRequired <= state.PlayerMap.Owner.Energy)
-    .sort((a, b) => weaponPreference[a.WeaponType].value - weaponPreference[b.WeaponType].value)
-    .pop();
+  let bestAmmo =
+    weaponPreference[
+      []
+        .concat(...myShips.map(s => s.Weapons))
+        .filter(w => w.EnergyRequired <= state.PlayerMap.Owner.Energy)
+        .sort((a, b) => weaponPreference[a.WeaponType].value - weaponPreference[b.WeaponType].value)
+        .pop().WeaponType
+    ];
 
   // take a chance at saving for bigger things
   let rollForCritical = Math.random() < 0.6;
@@ -99,7 +102,12 @@ function getAmmoType(state) {
 }
 
 function getNextSingleSpot(state) {
-  return getRandomSpot();
+  let s, spotOnMap;
+  do {
+    s = getRandomSpot();
+    spotOnMap = state.OpponentMap.Cells.find(c => c.X == s.x && c.Y == s.y);
+  } while (spotOnMap.Missed || spotOnMap.Damaged);
+  return s;
 }
 
 function getShieldPlacement(state) {
