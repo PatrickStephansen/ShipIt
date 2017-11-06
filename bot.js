@@ -1,13 +1,13 @@
 // based on the sample bot by Gerrit van Huyssteen
-let fs = require("fs");
+let fs = require('fs');
 
-let commandFileName = "command.txt";
-let placeShipFileName = "place.txt";
-let stateFileName = "state.json";
+let commandFileName = 'command.txt';
+let placeShipFileName = 'place.txt';
+let stateFileName = 'state.json';
 
 // This will be set in initBot function
-let key = "";
-let workingDirectory = "";
+let key = '';
+let workingDirectory = '';
 
 let boardSize = 10;
 
@@ -20,7 +20,7 @@ function initBot(args) {
   console.log(key);
 
   // Read the current state and choose an action
-  let stateFile = require(workingDirectory + "/" + stateFileName);
+  let stateFile = require(workingDirectory + '/' + stateFileName);
   let phase = stateFile.Phase;
   boardSize = stateFile.PlayerMap.MapWidth;
 
@@ -40,11 +40,11 @@ Destroyer ${boardSize - 1} 0 West
 Submarine 1 ${boardSize - 2} South
 Cruiser 3 ${boardSize - 2} South`;
 
-  fs.writeFile(workingDirectory + "/" + placeShipFileName, payload, function(err) {
+  fs.writeFile(workingDirectory + '/' + placeShipFileName, payload, function(err) {
     if (err) {
       return console.log(err);
     }
-    console.log("Ships were placed");
+    console.log('Ships were placed');
   });
 }
 
@@ -60,18 +60,42 @@ function commitViolence(workingDirectory, state) {
     payload = `8,${shieldPlace}
 `;
   } else {
-    let fire = 1;
+    let fire = getAmmoType(state);
     let target = getNextSingleSpot(state);
     console.log(`firing at ${target}`);
     payload = `${fire},${target}
 `;
   }
 
-  fs.writeFile(workingDirectory + "/" + commandFileName, payload, function(err) {
+  fs.writeFile(workingDirectory + '/' + commandFileName, payload, function(err) {
     if (err) {
       return console.log(err);
     }
   });
+}
+
+function getAmmoType(state) {
+  const myShips = state.PlayerMap.Owner.Ships.filter(s => !s.Destroyed);
+  const weaponPreference = {
+    SeekerMissile: { value: 100, command: '7' },
+    DiagonalCrossShot: { value: 50, command: '6' },
+    CrossShot: { value: 50, command: '5' },
+    CornerShot: { value: 25, command: '4' },
+    DoubleShot: { value: 10, command: '2' },
+    SingleShot: { value: 1, command: '1' }
+  };
+
+  let bestAmmo = []
+    .concat(...myShips.map(s => s.Weapons))
+    .filter(w => w.EnergyRequired <= state.PlayerMap.Owner.Energy)
+    .sort((a, b) => weaponPreference[a.WeaponType].value - weaponPreference[b.WeaponType].value)
+    .pop();
+
+  // take a chance at saving for bigger things
+  let rollForCritical = Math.random() < 0.6;
+  let ammoType = rollForCritical ? bestAmmo.command : '1';
+  console.log('using ammo: ', ammoType);
+  return ammoType;
 }
 
 function getNextSingleSpot(state) {
@@ -82,7 +106,7 @@ function getShieldPlacement(state) {
   const myShield = state.PlayerMap.Owner.Shield;
 
   if (!myShield.Active && myShield.CurrentRadius) {
-    console.log("Shield time");
+    console.log('Shield time');
     const myShips = state.PlayerMap.Owner.Ships.filter(s => !s.Destroyed);
     const shipLocations = [].concat(...myShips.map(s => s.Cells.filter(c => !c.Hit)));
 
@@ -97,7 +121,8 @@ function getShieldPlacement(state) {
         }
       }
     }
-    if (bestSpot.protected > 1) {
+    // give war a chance
+    if (bestSpot.protected > 1 && Math.random() < 0.3) {
       bestSpot.isGoodIdea = true;
       bestSpot.toString = function() {
         return `${this.x},${this.y}`;
