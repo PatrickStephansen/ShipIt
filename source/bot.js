@@ -103,12 +103,13 @@ function getAmmoType(state) {
 
 function getNextSingleSpot(state) {
   // fresh cells next to hits
-  let likelyHit = state.OpponentMap.Cells.find(
+  let likelyHits = state.OpponentMap.Cells.filter(
     c =>
       !(c.Damaged || c.Missed) &&
       state.OpponentMap.Cells.find(n => n.Damaged && Math.abs(n.X - c.X) + Math.abs(n.Y - c.Y) < 2)
   );
-  if (likelyHit) {
+  if (likelyHits && likelyHits.length) {
+    let likelyHit = likelyHits[Math.floor(Math.random() * likelyHits.length)];
     return {
       x: likelyHit.X,
       y: likelyHit.Y,
