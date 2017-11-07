@@ -81,6 +81,7 @@ function getAmmoType(state) {
     DiagonalCrossShot: { value: 50, command: '6' },
     CrossShot: { value: 50, command: '5' },
     CornerShot: { value: 25, command: '4' },
+    DoubleShot: { value: 10, command: '1' }, // Double-shots are pretty useless
     SingleShot: { value: 1, command: '1' }
   };
 
