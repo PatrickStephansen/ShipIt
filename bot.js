@@ -106,7 +106,7 @@ function getNextSingleSpot(state) {
   let likelyHit = state.OpponentMap.Cells.find(
     c =>
       !(c.Damaged || c.Missed) &&
-      state.OpponentMap.Cells.find(n => n.Damaged && Math.abs(n.X - c.X) < 2 && Math.abs(n.Y - c.Y) < 2)
+      state.OpponentMap.Cells.find(n => n.Damaged && Math.abs(n.X - c.X) + Math.abs(n.Y - c.Y) < 2)
   );
   if (likelyHit) {
     return {
