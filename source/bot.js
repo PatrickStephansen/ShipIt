@@ -180,6 +180,6 @@ function getRandomSpot(map) {
 
 function getEmptyNeighbouringCells(cell, map, distance = 1) {
   return map.filter(
-    c => !(c.Missed || c.Damaged) && Math.abs(c.X - cell.X) <= distance && Math.abs(c.Y - cell.Y) <= distance
+    c => !(c.Missed || c.Damaged) && Math.abs(c.X - cell.X) + Math.abs(c.Y - cell.Y) <= distance
   );
 }
