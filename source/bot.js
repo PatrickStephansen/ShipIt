@@ -118,12 +118,8 @@ function getNextSingleSpot(state) {
     };
   }
   // fall back on random
-  let s, spotOnMap;
-  do {
-    s = getRandomSpot();
-    spotOnMap = state.OpponentMap.Cells.find(c => c.X == s.x && c.Y == s.y);
-  } while (spotOnMap.Missed || spotOnMap.Damaged);
-  return s;
+
+  return getRandomSpot(state.OpponentMap.Cells);
 }
 
 function getShieldPlacement(state) {
@@ -157,12 +153,32 @@ function getShieldPlacement(state) {
   return { isGoodIdea: false };
 }
 
-function getRandomSpot() {
+function getRandomSpot(map) {
+  // weight shielded cells higher, assuming the enemy isn't wasting them
+  let options = map
+    .filter(c => !(c.Damaged || c.Missed))
+    .sort(
+      (a, b) =>
+        (b.ShieldHit - a.ShieldHit) * 2 * boardSize +
+        getEmptyNeighbouringCells(b, map).length -
+        getEmptyNeighbouringCells(a, map).length
+    );
+  let choice = 0;
+  while (Math.random() > 0.9 && choice < options.length) {
+    choice++;
+  }
+
   return {
-    x: Math.floor(Math.random() * boardSize),
-    y: Math.floor(Math.random() * boardSize),
+    x: options[choice].X,
+    y: options[choice].Y,
     toString: function() {
       return `${this.x},${this.y}`;
     }
   };
+}
+
+function getEmptyNeighbouringCells(cell, map, distance = 1) {
+  return map.filter(
+    c => !(c.Missed || c.Damaged) && Math.abs(c.X - cell.X) <= distance && Math.abs(c.Y - cell.Y) <= distance
+  );
 }

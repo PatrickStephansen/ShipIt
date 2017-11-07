@@ -5,5 +5,5 @@
     "BotType": "JavaScript",
     "ProjectLocation" : "",
     "RunFile" : "bot.js",
-    "RunArgs" : "--harmony"
+    "RunArgs" : ""
 }
